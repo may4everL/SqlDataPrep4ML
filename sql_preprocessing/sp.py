@@ -12,6 +12,7 @@ Notes
 """
 
 
+from logging import raiseExceptions
 import sqlalchemy
 import pandas as pd
 import numpy as np
@@ -1644,9 +1645,16 @@ class SqlPassthroughColumn (SqlFunction):
         return None
 
     def transform(self, sdf, columns):
-        column = columns if (not isinstance(columns, list)) else columns[0]
-        target_column = self.target_column if (self.target_column is not None) else column
-        sdf.add_column_to_output(column, target_column)
+        if isinstance(columns, list):
+            if len(self.target_column) != len(columns):
+                raise ValueError("length of target_column should be the same to the length of columns")
+            for i in range(len(columns)):
+                target_single_column = column if (self.target_column is None) else self.target_column[i]
+                sdf.add_column_to_output(column, target_single_column)
+        else:
+            column = columns if (not isinstance(columns, list)) else columns[0]
+            target_column = self.target_column if (self.target_column is not None) else column
+            sdf.add_column_to_output(column, target_column)
 
 
 # End of class SqlPassthroughColumn
@@ -3018,7 +3026,11 @@ class SqlColumnTransformer():
         for transformer in self.transformers:
             function = transformer[1]
             columns = transformer[2]
-            function.fit(sdf, columns)
+            if (not function is SqlKernelCenterer()) and (not function is SqlKernelCenterer()) and isinstance(columns, list):
+                for column in columns:
+                    function.fit(sdf, column)
+            else:
+                function.fit(sdf, columns)
 
 
     def transform(self, sdf):
@@ -3026,7 +3038,11 @@ class SqlColumnTransformer():
         for transformer in self.transformers: 
             function = transformer[1]
             columns = transformer[2]
-            function.transform(sdf, columns)
+            if (not function is SqlKernelCenterer()) and (not function is SqlKernelCenterer()) and isinstance(columns, list):
+                for column in columns:
+                    function.transform(sdf, column)
+            else:
+                function.transform(sdf, columns)
 
 
     def fit_transform(self, sdf):
@@ -3221,7 +3237,7 @@ class SqlNestedPipeline():
         #fit sql transformers - every step output is input into next step
         # to generate sql, transform must follow fit before moving onto next step
         for step in self.steps[:len(self.steps) - 1]: 
-            
+            print(f'----------step: {step}')
             if (copy_x_sdf is None):
                 copy_x_sdf = x_sdf.clone()
             else: 

@@ -20,6 +20,16 @@ from sklearn.preprocessing import *
 from sklearn.pipeline import *
 from sklearn.model_selection import train_test_split
 
+# Fix LabelEncoder
+class LabelEncoder2(LabelEncoder):
+    def fit(self, X, y=None):
+        super(LabelEncoder2, self).fit(X)
+    def transform(self, X, y=None):
+        res = super(LabelEncoder2, self).transform(X)
+        df = pd.DataFrame(data=res)
+        return df
+    def fit_transform(self, X, y=None):
+        return super(LabelEncoder2, self).fit(X).transform(X)
 
 # Postgress connection
 # User: postgress, password: password
@@ -66,7 +76,7 @@ preprocessor_df = ColumnTransformer(
     transformers=[
         ('Age', SimpleImputer(strategy='mean'), ['Age']),
         ('Pclass', OneHotEncoder(), ['Pclass']),
-        ('Sex', LabelEncoder(), ['Sex'])
+        ('Sex', LabelEncoder2(), ['Sex'])
     ]
 )
 
