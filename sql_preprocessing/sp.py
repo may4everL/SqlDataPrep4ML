@@ -800,6 +800,14 @@ class SqlDataFrame:
             self.fit_table = fit_table
             self.sub_table = sub_table
 
+        def __repr__(self):
+            return "Transformation(\nsource_column=%s,\ntarget_column=%s,\ncolumn_function=%s,\nfit_table=%s,\nsub_table=%s)" % (
+                self.source_column, \
+                self.target_column, \
+                self.column_function, \
+                self.fit_table, \
+                self.sub_table)
+
     # end of class Transformation
 
 
@@ -1649,10 +1657,10 @@ class SqlPassthroughColumn (SqlFunction):
             if len(self.target_column) != len(columns):
                 raise ValueError("length of target_column should be the same to the length of columns")
             for i in range(len(columns)):
-                target_single_column = column if (self.target_column is None) else self.target_column[i]
+                target_single_column = columns[i] if (self.target_column is None) else self.target_column[i]
                 sdf.add_column_to_output(column, target_single_column)
         else:
-            column = columns if (not isinstance(columns, list)) else columns[0]
+            column = columns
             target_column = self.target_column if (self.target_column is not None) else column
             sdf.add_column_to_output(column, target_column)
 
@@ -3237,7 +3245,7 @@ class SqlNestedPipeline():
         #fit sql transformers - every step output is input into next step
         # to generate sql, transform must follow fit before moving onto next step
         for step in self.steps[:len(self.steps) - 1]: 
-            print(f'----------step: {step}')
+            
             if (copy_x_sdf is None):
                 copy_x_sdf = x_sdf.clone()
             else: 

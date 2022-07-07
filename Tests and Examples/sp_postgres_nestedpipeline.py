@@ -63,17 +63,17 @@ x_train_sdf, x_test_sdf, y_train_df, y_test_df = sdf.train_test_split(test_size=
 
 # Nested pipeline
 
-code_17_to_19 = ['code_17', 'code_18', 'code_19']
 code_21_to_23 = ['code_21', 'code_22', 'code_23']
 code_24_to_26 = ['code_24', 'code_25', 'code_26']
+code_27_to_29 = ['code_27', 'code_28', 'code_29']
 
 
 
 preprocessor_l1 = SqlColumnTransformer(
     transformers=[
-        ('l1_code_17_18_19', SqlPassthroughColumn(['l1_code_17', 'l2_code_18', 'l1_code_19']), code_17_to_19),
-        ('l1_code_21_22_23', SqlLabelEncoder(['l1_code_21', 'l2_code_22', 'l1_code_23']), code_21_to_23),
-        ('l1_code_24_25_26', SqlSimpleImputer(strategy='mean'), code_24_to_26),
+        ('l1_code_21_22_23', SqlPassthroughColumn(), code_21_to_23),
+        # ('l1_code_24_25_26', SqlLabelEncoder(), code_24_to_26),
+        ('l1_code_27_28_29', SqlSimpleImputer(strategy='mean'), code_27_to_29),
 ])
 
 print(preprocessor_l1)
@@ -83,11 +83,11 @@ print(preprocessor_l1)
 
 preprocessor_l2 = SqlColumnTransformer(
     transformers=[
-        ('l1_code_17_18_19', SqlPassthroughColumn(), ['l1_code_17', 'l2_code_18', 'l1_code_19']),
-        ('l1_code_21_22_23', SqlLabelBinarizer(50), ['l1_code_21', 'l2_code_22', 'l1_code_23']),
-        ('l1_code_24_25_26', SqlMinMaxScaler(), code_24_to_26),
+        ('l1_code_21_22_23', SqlPassthroughColumn(), code_21_to_23),
+        # ('l1_code_24_25_26', SqlPassthroughColumn(), code_24_to_26),
+        ('l1_code_27_28_29', SqlMinMaxScaler(), code_27_to_29),
 ])
-
+## TODO:: LabelEncoder is not supported for multiple columns
 print(preprocessor_l2)
 
 
